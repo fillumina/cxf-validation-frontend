@@ -22,23 +22,36 @@ class ProcessorForJavaMethod {
         this.valid = new JAnnotation(jakarta.validation.Valid.class);
     }
 
-    void process(JavaMethod javaMethod) {
+    /**
+     * @return true when at least one annotation was written into this method, which is what decides
+     *     whether the interface needs the import
+     */
+    boolean process(JavaMethod javaMethod) {
+        boolean written = false;
         if (options.isValidOut()) {
             log("adding the annotation to the return value of " + javaMethod.getSignature());
             javaMethod.addAnnotation(VALID_RETURN, valid);
+            written = true;
         }
-        javaMethod.getParameters().forEach(this::process);
+        for (JavaParameter javaParameter : javaMethod.getParameters()) {
+            written |= process(javaParameter);
+        }
+        return written;
     }
 
-    private void process(JavaParameter javaParameter) {
+    private boolean process(JavaParameter javaParameter) {
+        boolean written = false;
         if (options.isValidIn() && (javaParameter.isIN() || javaParameter.isINOUT())) {
             log("adding the annotation to the incoming " + javaParameter.getName());
             javaParameter.addAnnotation(VALID_PARAM, valid);
+            written = true;
         }
         if (options.isValidOut() && (javaParameter.isOUT() || javaParameter.isINOUT())) {
             log("adding the annotation to the outgoing " + javaParameter.getName());
             javaParameter.addAnnotation(VALID_RETURN, valid);
+            written = true;
         }
+        return written;
     }
 
     private void log(String message) {

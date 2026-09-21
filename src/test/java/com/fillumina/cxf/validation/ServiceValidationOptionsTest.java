@@ -46,7 +46,6 @@ class ServiceValidationOptionsTest {
         ServiceValidationOptions options = builder.build();
         assertEquals(validIn, options.isValidIn());
         assertEquals(validOut, options.isValidOut());
-        assertEquals(validIn || validOut, options.writesSomething());
     }
 
     @Test

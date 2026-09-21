@@ -65,16 +65,6 @@ public final class ServiceValidationOptions {
         return verbose;
     }
 
-    /**
-     * Whether the generated interface needs the import of the annotation, which it does as soon as
-     * one of its sides carries it.
-     *
-     * @return true when a side carries the annotation
-     */
-    public boolean writesSomething() {
-        return validIn || validOut;
-    }
-
     void logActualOptions() {
         if (verbose) {
             System.out.println("[" + ValidSEIGenerator.FRONTEND_NAME + "] "
