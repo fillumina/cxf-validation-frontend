@@ -31,6 +31,13 @@ public class ValidSEIGenerator extends SEIGenerator {
 
     static final String FRONTEND_NAME = "bean-validation";
 
+    /**
+     * Creates the generator. CXF instantiates it from {@code META-INF/tools-plugin.xml}, so it
+     * takes no arguments.
+     */
+    public ValidSEIGenerator() {
+    }
+
     @Override
     public String getName() {
         return FRONTEND_NAME;

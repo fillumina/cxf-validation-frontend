@@ -28,6 +28,13 @@ import org.xml.sax.ErrorHandler;
  */
 public class FrontendOptionsPlugin extends Plugin {
 
+    /**
+     * Creates the plugin. XJC instantiates it from the service file of the jar, so it takes no
+     * arguments.
+     */
+    public FrontendOptionsPlugin() {
+    }
+
     @Override
     public String getOptionName() {
         return ServiceValidationOptions.OPTION_PREFIX_NAME;

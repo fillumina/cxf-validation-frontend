@@ -38,19 +38,39 @@ public final class ServiceValidationOptions {
         this.verbose = verbose;
     }
 
+    /**
+     * Whether the parameters the service takes carry the annotation.
+     *
+     * @return true when they do
+     */
     public boolean isValidIn() {
         return validIn;
     }
 
+    /**
+     * Whether the method itself, and the parameters the service returns, carry the annotation.
+     *
+     * @return true when they do
+     */
     public boolean isValidOut() {
         return validOut;
     }
 
+    /**
+     * Whether the frontend reports which annotation it wrote where.
+     *
+     * @return true when it does
+     */
     public boolean isVerbose() {
         return verbose;
     }
 
-    /** @return whether any side carries the annotation, and the import is therefore needed. */
+    /**
+     * Whether the generated interface needs the import of the annotation, which it does as soon as
+     * one of its sides carries it.
+     *
+     * @return true when a side carries the annotation
+     */
     public boolean writesSomething() {
         return validIn || validOut;
     }
@@ -69,6 +89,11 @@ public final class ServiceValidationOptions {
         return validIn ? "in" : validOut ? "out" : "none";
     }
 
+    /**
+     * The way to the options of the frontend.
+     *
+     * @return a builder, whose defaults are the ones the frontend starts with
+     */
     public static Builder builder() {
         return new Builder();
     }
@@ -84,9 +109,14 @@ public final class ServiceValidationOptions {
         }
 
         /**
-         * Reads one argument, and does nothing when it is not one of this frontend's.
+         * Reads one argument, and does nothing when it is not one of this frontend's. An argument
+         * of another plugin has to be left alone: XJC returns at the first plugin that consumes an
+         * argument, so a plugin that claims too much keeps the other's options from being read.
          *
+         * @param argument one argument of the command line, as it was written
          * @return true when the argument belonged to this frontend
+         * @throws BadCommandLineException when the argument is this frontend's but its value is not
+         *     one of the accepted ones
          */
         public boolean parseArgument(String argument) throws BadCommandLineException {
             if (!argument.startsWith(PREFIX)) {
@@ -124,6 +154,11 @@ public final class ServiceValidationOptions {
             return true;
         }
 
+        /**
+         * The end of the collection.
+         *
+         * @return the options, ready to be read by the frontend
+         */
         public ServiceValidationOptions build() {
             return new ServiceValidationOptions(validIn, validOut, verbose);
         }
