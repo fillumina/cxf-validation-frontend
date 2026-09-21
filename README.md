@@ -126,10 +126,10 @@ missing from the generated classes.
 
 ## Building
 
-The build needs nix. `nix-shell` gives JDK 21 and Maven:
+The build needs JDK 21 and Maven, and nothing else. With both on the path:
 
 ```
-nix-shell --run 'mvn -B verify'
+mvn -B verify
 ```
 
 Build with `verify` rather than `test`. One test — `FrontendJarIT`, which runs the frontend out
