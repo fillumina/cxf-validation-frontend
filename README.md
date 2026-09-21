@@ -82,18 +82,47 @@ The frontend has one option, `generateAnnotations`, and it is written as
   annotations off;
 - `verbose`, on its own, prints which annotation was written where.
 
-### Why an XJC plugin comes with it
+### How an option reaches a CXF frontend, and the XJC plugin that comes with it
 
-CXF hands the arguments it is given to XJC, and XJC refuses an argument that none of its plugins
-consumes: it stops with `unrecognized parameter` and prints its usage. An option of a CXF frontend
-therefore needs an XJC plugin to accept it, and this project ships one,
-`FrontendOptionsPlugin`. It does nothing with the option beyond accepting it — the frontend reads
-it in the CXF stage — and its name, `-XCxfValidationFrontendOptions`, says exactly that.
+A frontend cannot simply be handed its own options. CXF collects the arguments written
+`-xjc-…` into one array and passes that array to XJC, and it is the same array, under
+`ToolConstants.CFG_XJC_ARGS`, that the frontend reads when it runs. There is no second channel.
 
-That name is deliberately not the name of the plugin that annotates the generated classes
-(`-XBeanValidationAnnotations`). Two plugins answering to one option name are a trap: XJC activates
-the first one it finds for the bare option, and returns at the first one that consumes an argument,
-so the other is left out silently and according to the order of the classpath.
+XJC, in turn, refuses an argument that none of its plugins consumes: it stops with
+`unrecognized parameter` and prints its usage. So an option of a frontend only gets through if
+some XJC plugin accepts it on the way. That is the entire job of `FrontendOptionsPlugin`, which
+ships with this project:
+
+```java
+@Override
+public int parseArgument(Options opt, String[] args, int index) {
+    return args[index].startsWith("-" + getOptionName()) ? 1 : 0;
+}
+
+@Override
+public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
+    // the annotations of the generated classes are not this plugin's business
+    return true;
+}
+```
+
+It accepts the arguments of this frontend and reads nothing from them. The frontend parses the
+values itself, in the CXF stage, out of the same array — which is what keeps this project
+independent of the plugin that annotates the generated classes: the two can be used together, or
+separately, and neither needs the other on its classpath.
+
+Two rules hold the arrangement together, and both are there because of how XJC walks its plugins:
+
+- **the option name belongs to this project** (`-XCxfValidationFrontendOptions`), never to another
+  plugin's. For a bare option XJC activates the first plugin whose name matches and returns without
+  asking the rest, so two plugins answering to one name mean that one of them silently never runs;
+- **the accepting plugin consumes only its own arguments** and returns "not mine" for everything
+  else. For an argument that carries a value XJC returns at the first plugin that consumes it, so a
+  plugin that claims too much keeps another plugin's options from ever being read.
+
+Both are covered by `ServiceValidationOptionsTest`. The second one is worth a test of its own
+because the failure is invisible: the build succeeds and the other plugin's annotations are simply
+missing from the generated classes.
 
 ## Building
 

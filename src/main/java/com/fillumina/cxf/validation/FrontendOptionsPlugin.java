@@ -22,6 +22,9 @@ import org.xml.sax.ErrorHandler;
  *
  * <p>The frontend itself reads the options in the CXF stage, from the arguments CXF passes it, so
  * nothing here parses them.
+ *
+ * <p>The README has a section on the arrangement, "How an option reaches a CXF frontend, and the
+ * XJC plugin that comes with it", including the two rules that keep it from going wrong.
  */
 public class FrontendOptionsPlugin extends Plugin {
 
