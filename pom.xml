@@ -115,6 +115,56 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.16.0</version>
       </plugin>
+
+      <!--
+        The jar is what a build puts on the classpath of the cxf-codegen-plugin, and the ordinary
+        suite runs against target/classes, where a resource missing from the jar cannot be noticed.
+        Failsafe runs after package, so the jar exists, and FrontendJarIT runs the frontend out of
+        it: a classpath of the jar and the tooling alone, with no classes directory on it.
+
+        Being an integration test, it does not run under 'mvn test': use 'mvn verify', 'mvn install'
+        or 'mvn deploy'.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <systemPropertyVariables>
+            <frontend.jar>${project.build.directory}/${project.build.finalName}.jar</frontend.jar>
+            <tooling.classpath.file>${project.build.directory}/test-classpath.txt</tooling.classpath.file>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>the-jar-is-the-plugin</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- writes the tooling classpath, without the classes directory, for the test above -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>the-tooling-classpath</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <includeScope>test</includeScope>
+              <outputFile>${project.build.directory}/test-classpath.txt</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

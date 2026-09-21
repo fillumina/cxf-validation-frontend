@@ -131,3 +131,8 @@ The build needs nix. `nix-shell` gives JDK 21 and Maven:
 ```
 nix-shell --run 'mvn -B verify'
 ```
+
+Build with `verify` rather than `test`. One test — `FrontendJarIT`, which runs the frontend out
+of the jar — needs the jar, and the jar is built by `package`, which comes after the test phase; so
+`mvn test` runs 14 tests and leaves that one out, while `mvn verify`, `mvn install` and
+`mvn deploy` run all 15. CI runs `verify`.
