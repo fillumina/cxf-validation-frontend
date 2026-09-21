@@ -9,7 +9,7 @@ import com.sun.tools.xjc.BadCommandLineException;
  * {@link FrontendOptionsPlugin}:
  *
  * <pre>
- * -xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut
+ * -xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut
  * </pre>
  *
  * <p>The name is this project's. It is not the name of the plugin that annotates the generated
@@ -26,7 +26,7 @@ public final class ServiceValidationOptions {
     public static final String PREFIX = "-" + OPTION_PREFIX_NAME + ":";
 
     /** The option that says which sides of a method carry the annotation. */
-    public static final String OPTION_NAME = "generateServiceValidationAnnotations";
+    public static final String OPTION_NAME = "generateAnnotations";
 
     private final boolean validIn;
     private final boolean validOut;

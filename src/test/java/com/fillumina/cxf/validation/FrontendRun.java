@@ -30,7 +30,7 @@ final class FrontendRun {
     }
 
     /**
-     * @param policy the value of the {@code generateServiceValidationAnnotations} option, that is
+     * @param policy the value of the {@code generateAnnotations} option, that is
      *     {@code in}, {@code out}, {@code inOut} or {@code none}
      */
     static FrontendRun of(String policy) throws Exception {

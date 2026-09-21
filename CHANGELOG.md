@@ -9,6 +9,6 @@
   `ValidSEIGenerator`, so one option is enough to generate the interface and have it validated.
 - Jakarta only: it writes `jakarta.validation.Valid`. There is no `javax` flavour.
 - The option is written under this project's own name,
-  `-xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=...`, and accepts `none`
+  `-xjc-XCxfValidationFrontendOptions:generateAnnotations=...`, and accepts `none`
   beside `in`, `out` and `inOut`. A small XJC plugin accepts it, because XJC refuses an argument no
   plugin consumes; see the README for why it does not answer to the annotation plugin's name.

@@ -28,7 +28,7 @@ that generates a client does not have to carry the annotation plugin.
 With the CXF command line:
 
 ```
-wsdl2java -frontend bean-validation -xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut Hello.wsdl
+wsdl2java -frontend bean-validation -xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut Hello.wsdl
 ```
 
 Inside a Maven build it goes on the classpath of the `cxf-codegen-plugin`, and the frontend and its
@@ -50,7 +50,7 @@ option are passed among the extra arguments:
             <extraargs>
               <extraarg>-frontend</extraarg>
               <extraarg>bean-validation</extraarg>
-              <extraarg>-xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut</extraarg>
+              <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut</extraarg>
             </extraargs>
           </wsdlOption>
         </wsdlOptions>
@@ -72,8 +72,8 @@ option are passed among the extra arguments:
 
 ## Options
 
-The frontend has one option, `generateServiceValidationAnnotations`, and it is written as
-`-xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=<value>`:
+The frontend has one option, `generateAnnotations`, and it is written as
+`-xjc-XCxfValidationFrontendOptions:generateAnnotations=<value>`:
 
 - `in` — the parameters the service takes carry `@Valid`;
 - `out` — the method itself, and the parameters the service returns, carry it;

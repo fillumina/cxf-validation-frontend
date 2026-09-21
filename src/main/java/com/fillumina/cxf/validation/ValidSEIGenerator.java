@@ -21,7 +21,7 @@ import org.apache.cxf.tools.wsdlto.frontend.jaxws.processor.WSDLToJavaProcessor;
  * annotations to the model before handing it back.
  *
  * <p>Which of the method, the incoming parameters and the outgoing parameters are annotated is the
- * {@code generateServiceValidationAnnotations} option, read from the XJC arguments CXF passes
+ * {@code generateAnnotations} option, read from the XJC arguments CXF passes
  * through.
  *
  * @author Vojtech Krasa
