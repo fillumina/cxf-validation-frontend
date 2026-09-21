@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.fillumina</groupId>
+  <artifactId>cxf-validation-frontend</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>cxf-validation-frontend</name>
+
+  <description>
+    Apache CXF frontend that adds the Jakarta Bean Validation @Valid annotation to the methods and
+    the parameters of the service endpoint interface generated from a WSDL.
+  </description>
+
+  <url>https://github.com/fillumina/cxf-validation-frontend/</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:fillumina/cxf-validation-frontend.git</connection>
+    <url>git@github.com:fillumina/cxf-validation-frontend.git</url>
+    <developerConnection>scm:git:git@github.com:fillumina/cxf-validation-frontend.git</developerConnection>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Francesco Illuminati</name>
+      <email>fillumina@gmail.com</email>
+    </developer>
+  </developers>
+
+  <!-- The code is a port of the frontend Vojtech Krasa and Francesco Illuminati wrote, which the
+       project this was split from continues. Neither is a maintainer of this artifact, which is
+       what the developers list above records, but the authorship is theirs. -->
+  <contributors>
+    <contributor>
+      <name>Vojtech Krasa</name>
+      <email>vojta.krasa@gmail.com</email>
+    </contributor>
+  </contributors>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <!-- a fixed instant keeps the archives byte-reproducible and keeps the javadoc jar working:
+         maven-archiver falls back to SOURCE_DATE_EPOCH, which the nix shell exports as a value it
+         then rejects as out of range -->
+    <project.build.outputTimestamp>2026-09-21T00:00:00Z</project.build.outputTimestamp>
+    <cxf.version>4.2.3</cxf.version>
+    <junit.version>6.1.3</junit.version>
+    <validation.version>3.1.1</validation.version>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.6.0</version>
+          <configuration>
+            <trimStackTrace>false</trimStackTrace>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.3</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[21,)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.16.0</version>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- CXF runs the frontend and supplies its own classes, so they are not forced on consumers;
+         a build that uses this jar runs it inside the cxf-codegen-plugin -->
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-tools-wsdlto-frontend-jaxws</artifactId>
+      <version>${cxf.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- the annotation this frontend writes, which the generated interface needs at runtime -->
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>${validation.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>central</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.4.0</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.12.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <!-- https://central.sonatype.org/publish/publish-maven/#gpg-signed-components -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.8</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <keyname>${gpg.keyname}</keyname>
+                  <passphraseServerId>${gpg.passphrase}</passphraseServerId>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- https://central.sonatype.org/publish/publish-portal-maven/#autopublish -->
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.11.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
