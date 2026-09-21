@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Stream;
 import org.apache.cxf.tools.common.CommandInterfaceUtils;
 import org.apache.cxf.tools.common.ToolConstants;
@@ -33,7 +35,7 @@ final class FrontendRun {
      * @param policy the value of the {@code generateAnnotations} option, that is
      *     {@code in}, {@code out}, {@code inOut} or {@code none}
      */
-    static FrontendRun of(String policy) throws Exception {
+    static FrontendRun of(String policy, String... extraArguments) throws Exception {
         Path output = Path.of("target", "generated-test-sources", "wsdl2java-" + policy);
         deleteRecursively(output);
         Files.createDirectories(output);
@@ -43,12 +45,20 @@ final class FrontendRun {
             ServiceValidationOptions.PREFIX + ServiceValidationOptions.OPTION_NAME + "=" + policy });
         context.put(ToolConstants.CFG_OUTPUTDIR, output.toString());
 
+        List<String> cxfArguments = new ArrayList<>(List.of(
+                "-frontend", ValidSEIGenerator.FRONTEND_NAME));
+        cxfArguments.addAll(List.of(extraArguments));
+        cxfArguments.add(WSDL.toAbsolutePath().toString());
+
         CommandInterfaceUtils.commandCommonMain();
-        new WSDLToJava(new String[] {
-            "-frontend", ValidSEIGenerator.FRONTEND_NAME,
-            WSDL.toAbsolutePath().toString() }).run(context);
+        new WSDLToJava(cxfArguments.toArray(String[]::new)).run(context);
 
         return new FrontendRun(output);
+    }
+
+    /** @return whether this run wrote the file, the path being relative to the output directory. */
+    boolean hasFile(String relativePath) {
+        return Files.exists(output.resolve(relativePath));
     }
 
     /** @return the generated service endpoint interface, as it was written. */
