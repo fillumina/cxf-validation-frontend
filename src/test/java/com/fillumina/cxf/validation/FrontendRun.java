@@ -40,7 +40,7 @@ final class FrontendRun {
 
         ToolContext context = new ToolContext();
         context.put(ToolConstants.CFG_XJC_ARGS, new String[] {
-            "-XBeanValidationAnnotations:generateServiceValidationAnnotations=" + policy });
+            ServiceValidationOptions.PREFIX + ServiceValidationOptions.OPTION_NAME + "=" + policy });
         context.put(ToolConstants.CFG_OUTPUTDIR, output.toString());
 
         CommandInterfaceUtils.commandCommonMain();

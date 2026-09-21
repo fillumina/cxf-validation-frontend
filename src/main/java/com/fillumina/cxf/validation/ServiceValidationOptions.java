@@ -3,24 +3,30 @@ package com.fillumina.cxf.validation;
 import com.sun.tools.xjc.BadCommandLineException;
 
 /**
- * The options of this frontend.
+ * The options of the {@code bean-validation} frontend.
  *
- * <p>They are written among the XJC arguments, after the name of the plugin whose vocabulary they
- * belong to, so that a build that already passes the options of the annotation plugin passes these
- * the same way:
+ * <p>They travel among the XJC arguments, under a name of their own, and are accepted there by
+ * {@link FrontendOptionsPlugin}:
  *
  * <pre>
- * -xjc-XBeanValidationAnnotations:generateServiceValidationAnnotations=inOut
+ * -xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut
  * </pre>
  *
- * <p>Only this one option is read here. The frontend needs no other, and it deliberately does not
- * depend on the plugin that writes the annotations of the generated classes.
+ * <p>The name is this project's. It is not the name of the plugin that annotates the generated
+ * classes: an option that two plugins answer to makes XJC activate and consult only the first of
+ * them, which is silent and depends on the classpath order. Only this one option is read here, and
+ * the frontend deliberately does not depend on that plugin.
  */
 public final class ServiceValidationOptions {
 
-    /** The option name, which is the one the frontend answered to before it was split out. */
-    static final String OPTION_NAME = "generateServiceValidationAnnotations";
-    static final String PREFIX = "-XBeanValidationAnnotations:";
+    /** The name of the option among the XJC arguments, without its leading dash. */
+    public static final String OPTION_PREFIX_NAME = "XCxfValidationFrontendOptions";
+
+    /** What an option of this frontend starts with, as it is written on the command line. */
+    public static final String PREFIX = "-" + OPTION_PREFIX_NAME + ":";
+
+    /** The option that says which sides of a method carry the annotation. */
+    public static final String OPTION_NAME = "generateServiceValidationAnnotations";
 
     private final boolean validIn;
     private final boolean validOut;
@@ -52,7 +58,7 @@ public final class ServiceValidationOptions {
     void logActualOptions() {
         if (verbose) {
             System.out.println("[" + ValidSEIGenerator.FRONTEND_NAME + "] "
-                    + "generateServiceValidationAnnotations: " + value());
+                    + OPTION_NAME + ": " + value());
         }
     }
 

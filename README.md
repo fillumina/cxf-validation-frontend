@@ -28,11 +28,11 @@ that generates a client does not have to carry the annotation plugin.
 With the CXF command line:
 
 ```
-wsdl2java -frontend bean-validation Hello.wsdl
+wsdl2java -frontend bean-validation -xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut Hello.wsdl
 ```
 
 Inside a Maven build it goes on the classpath of the `cxf-codegen-plugin`, and the frontend and its
-options are passed among the extra arguments:
+option are passed among the extra arguments:
 
 ```xml
 <plugin>
@@ -50,7 +50,7 @@ options are passed among the extra arguments:
             <extraargs>
               <extraarg>-frontend</extraarg>
               <extraarg>bean-validation</extraarg>
-              <extraarg>-xjc-XBeanValidationAnnotations:generateServiceValidationAnnotations=inOut</extraarg>
+              <extraarg>-xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=inOut</extraarg>
             </extraargs>
           </wsdlOption>
         </wsdlOptions>
@@ -72,12 +72,28 @@ options are passed among the extra arguments:
 
 ## Options
 
-- `generateServiceValidationAnnotations` — `in`, `out`, `inOut` or `none`, and `inOut` by default:
-  it says which of the method, the incoming parameters and the outgoing parameters carry `@Valid`.
-- `verbose` — prints which annotation was written where.
+The frontend has one option, `generateServiceValidationAnnotations`, and it is written as
+`-xjc-XCxfValidationFrontendOptions:generateServiceValidationAnnotations=<value>`:
 
-Both are written after the plugin name they belong to, as in
-`-xjc-XBeanValidationAnnotations:generateServiceValidationAnnotations=in`.
+- `in` — the parameters the service takes carry `@Valid`;
+- `out` — the method itself, and the parameters the service returns, carry it;
+- `inOut` — both, and this is the default;
+- `none` — neither, which is how a build that wants the frontend for something else turns the
+  annotations off;
+- `verbose`, on its own, prints which annotation was written where.
+
+### Why an XJC plugin comes with it
+
+CXF hands the arguments it is given to XJC, and XJC refuses an argument that none of its plugins
+consumes: it stops with `unrecognized parameter` and prints its usage. An option of a CXF frontend
+therefore needs an XJC plugin to accept it, and this project ships one,
+`FrontendOptionsPlugin`. It does nothing with the option beyond accepting it — the frontend reads
+it in the CXF stage — and its name, `-XCxfValidationFrontendOptions`, says exactly that.
+
+That name is deliberately not the name of the plugin that annotates the generated classes
+(`-XBeanValidationAnnotations`). Two plugins answering to one option name are a trap: XJC activates
+the first one it finds for the bare option, and returns at the first one that consumes an argument,
+so the other is left out silently and according to the order of the classpath.
 
 ## Building
 
