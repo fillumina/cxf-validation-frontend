@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The frontend this project adds to Apache CXF's wsdl2java.
+
+  It carries the whole generator set of the jaxws frontend plus this project's ValidSEIGenerator,
+  which is the one that writes the @Valid annotations: CXF reads a single generators element per
+  frontend, and a generator may name its own package, which is how ours sits next to CXF's.
+-->
+<plugin xmlns="http://cxf.apache.org/tools/plugin" name="cxf-validation-frontend" version="" provider="fillumina">
+    <frontend name="bean-validation" package="org.apache.cxf.tools.wsdlto.frontend.jaxws" profile="JAXWSProfile">
+        <container name="JAXWSContainer" package="org.apache.cxf.tools.wsdlto.frontend.jaxws" toolspec="jaxws-toolspec.xml" />
+        <processor name="WSDLToJavaProcessor" package="org.apache.cxf.tools.wsdlto.frontend.jaxws.processor" />
+        <builder name="JAXWSDefinitionBuilder" package="org.apache.cxf.tools.wsdlto.frontend.jaxws.wsdl11" />
+        <generators package="org.apache.cxf.tools.wsdlto.frontend.jaxws.generators">
+            <generator name="AntGenerator" />
+            <generator name="ClientGenerator" />
+            <generator name="FaultGenerator" />
+            <generator name="ImplGenerator" />
+            <generator name="SEIGenerator" />
+            <generator name="ServerGenerator" />
+            <generator name="ServiceGenerator" />
+            <generator name="ValidSEIGenerator" package="com.fillumina.cxf.validation" />
+        </generators>
+    </frontend>
+</plugin>
