@@ -44,6 +44,11 @@ public final class ServiceValidationOptions {
         return verbose;
     }
 
+    /** @return whether any side carries the annotation, and the import is therefore needed. */
+    public boolean writesSomething() {
+        return validIn || validOut;
+    }
+
     void logActualOptions() {
         if (verbose) {
             System.out.println("[" + ValidSEIGenerator.FRONTEND_NAME + "] "

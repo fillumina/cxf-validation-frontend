@@ -135,6 +135,15 @@
       <version>${validation.version}</version>
     </dependency>
 
+    <!-- CXF looks the databinding up on the classpath when it generates, and a build that runs
+         wsdl2java supplies it: the tests need it to drive the tooling themselves -->
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-tools-wsdlto-databinding-jaxb</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
