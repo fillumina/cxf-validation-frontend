@@ -22,6 +22,12 @@ that generates a client does not have to carry the annotation plugin.
 - JDK 21 or newer.
 - Apache CXF 4.2, which is what it is built against and what supplies the tooling at run time.
 - Jakarta Bean Validation 3.1, for the annotation it writes.
+- **Jakarta only, and it cannot be otherwise: CXF 4 validates with `jakarta.validation`.** Its
+  `BeanValidationProvider` takes a `jakarta.validation.Validator`, and `cxf-core` declares the
+  `jakarta.validation` API and never the `javax` one, so a `javax.validation.Valid` written on the
+  generated interface would be invisible to the runtime. This frontend writes `jakarta.validation.Valid`
+  and has no `javax` flavour. A build that still validates with the `javax` API belongs to the older
+  `com.fillumina:krasa-jaxb-tools`, whose frontends run with CXF 3.5.
 
 ## Using it
 
