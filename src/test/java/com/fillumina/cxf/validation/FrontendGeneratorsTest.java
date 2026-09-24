@@ -24,7 +24,7 @@ class FrontendGeneratorsTest {
 
     @Test
     void theServiceGeneratorRunsBesideTheValidatedInterface() throws Exception {
-        FrontendRun run = FrontendRun.of("inOut");
+        FrontendRun run = FrontendRun.of("both");
 
         assertTrue(run.hasFile(SEI), "the interface the frontend validates");
         assertTrue(run.hasFile(SERVICE), "the service class CXF's own generator writes");
@@ -33,7 +33,7 @@ class FrontendGeneratorsTest {
 
     @Test
     void theClientServerAndImplGeneratorsRunWhenTheyAreAsked() throws Exception {
-        FrontendRun run = FrontendRun.of("inOut", "-client", "-server", "-impl");
+        FrontendRun run = FrontendRun.of("both", "-client", "-server", "-impl");
 
         assertTrue(run.hasFile(IMPL), "the implementation");
         assertTrue(run.hasFile(CLIENT), "the client stub");

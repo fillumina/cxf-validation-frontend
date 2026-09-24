@@ -35,7 +35,7 @@ all, and one that generates a client does not have to carry the annotation plugi
 With the CXF command line:
 
 ```
-wsdl2java -frontend bean-validation -xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut Hello.wsdl
+wsdl2java -frontend bean-validation -xjc-XCxfValidationFrontendOptions:generateAnnotations=both Hello.wsdl
 ```
 
 Inside a Maven build it goes on the classpath of the `cxf-codegen-plugin`, and the frontend and its
@@ -57,7 +57,7 @@ option are passed among the extra arguments:
             <extraargs>
               <extraarg>-frontend</extraarg>
               <extraarg>bean-validation</extraarg>
-              <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut</extraarg>
+              <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=both</extraarg>
             </extraargs>
           </wsdlOption>
         </wsdlOptions>
@@ -82,12 +82,17 @@ option are passed among the extra arguments:
 The frontend has one option, `generateAnnotations`, and it is written as
 `-xjc-XCxfValidationFrontendOptions:generateAnnotations=<value>`:
 
-- `in` — the parameters the service takes carry `@Valid`;
-- `out` — the method itself, and the parameters the service returns, carry it;
-- `inOut` — both, and this is the default;
-- `none` — neither, which is how a build that wants the frontend for something else turns the
-  annotations off;
-- `verbose`, on its own, prints which annotation was written where.
+| value | alternative | what it does |
+| --- | --- | --- |
+| `request` | `in` | add `@Valid` to the service parameters |
+| `response` | `out` | add `@Valid` to the method and to the parameters the service returns |
+| `both` | `inOut` | add `@Valid` to both, and this is the default |
+| `none` | | add nothing — the service interface is written as CXF writes it, with no annotation |
+
+Both columns are accepted, whatever the case. Those names are the vocabulary the WSDL and
+`WebParam.Mode` use for the input and the output message, which is what the generated interface
+prints, so a build written by someone who knows it keeps working. `verbose`, on its own, prints
+which annotation was written where.
 
 ### How an option reaches a CXF frontend, and the XJC plugin that comes with it
 

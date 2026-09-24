@@ -9,7 +9,7 @@ import com.sun.tools.xjc.BadCommandLineException;
  * {@link FrontendOptionsPlugin}:
  *
  * <pre>
- * -xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut
+ * -xjc-XCxfValidationFrontendOptions:generateAnnotations=both
  * </pre>
  *
  * <p>The name is this project's. It is not the name of the plugin that annotates the generated
@@ -25,7 +25,7 @@ public final class ServiceValidationOptions {
     /** What an option of this frontend starts with, as it is written on the command line. */
     public static final String PREFIX = "-" + OPTION_PREFIX_NAME + ":";
 
-    /** The option that says which sides of a method carry the annotation. */
+    /** The option that says where {@code @Valid} is written on a method. */
     public static final String OPTION_NAME = "generateAnnotations";
 
     private final boolean validIn;
@@ -39,18 +39,19 @@ public final class ServiceValidationOptions {
     }
 
     /**
-     * Whether the parameters the service takes carry the annotation.
+     * Whether {@code @Valid} is written on the parameters the service takes.
      *
-     * @return true when they do
+     * @return true when it is
      */
     public boolean isValidIn() {
         return validIn;
     }
 
     /**
-     * Whether the method itself, and the parameters the service returns, carry the annotation.
+     * Whether {@code @Valid} is written on the method itself and on the parameters the service
+     * returns.
      *
-     * @return true when they do
+     * @return true when it is
      */
     public boolean isValidOut() {
         return validOut;
@@ -74,9 +75,9 @@ public final class ServiceValidationOptions {
 
     private String value() {
         if (validIn && validOut) {
-            return "inOut";
+            return "both";
         }
-        return validIn ? "in" : validOut ? "out" : "none";
+        return validIn ? "request" : validOut ? "response" : "none";
     }
 
     /**
@@ -120,16 +121,19 @@ public final class ServiceValidationOptions {
             if ("verbose".equals(name)) {
                 verbose = !"false".equalsIgnoreCase(value);
             } else if (OPTION_NAME.equals(name)) {
+                // request and response are what the value means to a reader; in and out are what
+                // the WSDL calls the two messages, and what WebParam.Mode calls them in the
+                // interface this frontend annotates, so both spellings are accepted
                 switch (value.toLowerCase()) {
-                    case "in" -> {
+                    case "request", "in" -> {
                         validIn = true;
                         validOut = false;
                     }
-                    case "out" -> {
+                    case "response", "out" -> {
                         validIn = false;
                         validOut = true;
                     }
-                    case "inout" -> {
+                    case "both", "inout" -> {
                         validIn = true;
                         validOut = true;
                     }
@@ -138,7 +142,8 @@ public final class ServiceValidationOptions {
                         validOut = false;
                     }
                     default -> throw new BadCommandLineException("option " + OPTION_NAME
-                            + " accepts in, out, inOut or none, and not '" + value + "'");
+                            + " accepts request, response, both or none, or the in, out and inout of"
+                            + " the WSDL, and not '" + value + "'");
                 }
             }
             return true;

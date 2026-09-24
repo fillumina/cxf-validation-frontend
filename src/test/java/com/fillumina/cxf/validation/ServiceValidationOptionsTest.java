@@ -32,10 +32,18 @@ class ServiceValidationOptionsTest {
 
     @ParameterizedTest(name = "{0}")
     @CsvSource({
+        // the names a reader understands
+        "request,  true,  false",
+        "response, false, true",
+        "both,     true,  true",
+        "none,     false, false",
+        // the names the WSDL gives the same two sides, whatever the case
         "in,    true,  false",
         "out,   false, true",
         "inOut, true,  true",
-        "none,  false, false",
+        "IN,    true,  false",
+        "Out,   false, true",
+        "INOUT, true,  true",
     })
     void thePolicyIsRead(String policy, boolean validIn, boolean validOut) throws Exception {
         ServiceValidationOptions.Builder builder = ServiceValidationOptions.builder();
@@ -52,7 +60,11 @@ class ServiceValidationOptionsTest {
     void anUnknownPolicyIsRefused() {
         ServiceValidationOptions.Builder builder = ServiceValidationOptions.builder();
 
-        assertThrows(Exception.class, () -> builder.parseArgument(
+        Exception thrown = assertThrows(Exception.class, () -> builder.parseArgument(
                 ServiceValidationOptions.PREFIX + ServiceValidationOptions.OPTION_NAME + "=sideways"));
+
+        // the message says what is accepted, so the reader does not have to look it up
+        assertTrue(thrown.getMessage().contains("request"), thrown.getMessage());
+        assertTrue(thrown.getMessage().contains("both"), thrown.getMessage());
     }
 }

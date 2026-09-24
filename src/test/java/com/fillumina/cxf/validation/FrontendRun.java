@@ -33,7 +33,7 @@ final class FrontendRun {
 
     /**
      * @param policy the value of the {@code generateAnnotations} option, that is
-     *     {@code in}, {@code out}, {@code inOut} or {@code none}
+     *     {@code request}, {@code response}, {@code both} or {@code none}
      */
     static FrontendRun of(String policy, String... extraArguments) throws Exception {
         Path output = Path.of("target", "generated-test-sources", "wsdl2java-" + policy);

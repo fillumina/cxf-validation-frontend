@@ -15,10 +15,10 @@ class ValidSEIGeneratorTest {
 
     @ParameterizedTest(name = "{0}")
     @CsvSource({
-        "in,    false, true",
-        "out,   true,  false",
-        "inOut, true,  true",
-        "none,  false, false",
+        "request,  false, true",
+        "response, true,  false",
+        "both,     true,  true",
+        "none,     false, false",
     })
     void theAnnotationIsWrittenWhereTheOptionSays(String policy, boolean onTheMethod,
             boolean onTheParameter) throws Exception {

@@ -24,7 +24,7 @@ class ProcessorForJavaInterfaceTest {
         JavaInterface javaInterface = new JavaInterface();
         javaInterface.addMethod(method("ping"));
 
-        new ProcessorForJavaInterface(options("in")).process(javaInterface);
+        new ProcessorForJavaInterface(options("request")).process(javaInterface);
 
         assertFalse(javaInterface.getImports().hasNext(),
                 "nothing was annotated, so the interface needs no import");
@@ -35,7 +35,7 @@ class ProcessorForJavaInterfaceTest {
         JavaInterface javaInterface = new JavaInterface();
         javaInterface.addMethod(methodWithIncomingParameter("getWeather"));
 
-        new ProcessorForJavaInterface(options("in")).process(javaInterface);
+        new ProcessorForJavaInterface(options("request")).process(javaInterface);
 
         assertTrue(javaInterface.getImports().hasNext(),
                 "the parameter carries the annotation, so the import is needed");
@@ -47,7 +47,7 @@ class ProcessorForJavaInterfaceTest {
         JavaInterface javaInterface = new JavaInterface();
         javaInterface.addMethod(method("ping"));
 
-        new ProcessorForJavaInterface(options("out")).process(javaInterface);
+        new ProcessorForJavaInterface(options("response")).process(javaInterface);
 
         assertTrue(javaInterface.getImports().hasNext(),
                 "the method carries the annotation, so the import is needed");

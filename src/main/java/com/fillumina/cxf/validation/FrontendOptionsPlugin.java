@@ -43,7 +43,9 @@ public class FrontendOptionsPlugin extends Plugin {
     @Override
     public String getUsage() {
         return "  -" + ServiceValidationOptions.OPTION_PREFIX_NAME
-                + ":" + ServiceValidationOptions.OPTION_NAME + "=in|out|inOut|none\n"
+                + ":" + ServiceValidationOptions.OPTION_NAME + "=request|response|both|none\n"
+                + "      :  in, out and inout, the names the WSDL gives the same three, are accepted"
+                + " too\n"
                 + "      :  read by the cxf-validation-frontend frontend, which writes @Valid on the"
                 + " service endpoint interface it generates. This plugin only accepts the option:"
                 + " XJC refuses an argument no plugin consumes, and a frontend's options travel"

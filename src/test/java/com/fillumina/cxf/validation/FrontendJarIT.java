@@ -42,7 +42,7 @@ class FrontendJarIT {
                 "org.apache.cxf.tools.wsdlto.WSDLToJava",
                 "-frontend", ValidSEIGenerator.FRONTEND_NAME,
                 "-xjc-" + ServiceValidationOptions.OPTION_PREFIX_NAME + ":"
-                        + ServiceValidationOptions.OPTION_NAME + "=inOut",
+                        + ServiceValidationOptions.OPTION_NAME + "=both",
                 "-d", output.toString(),
                 Path.of(WSDL).toAbsolutePath().toString()));
 
