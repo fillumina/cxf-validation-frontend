@@ -13,9 +13,10 @@ public interface HelloPortType {
 }
 ```
 
-It is the third piece of the old `com.fillumina:krasa-jaxb-tools`, split out so that a build which
-only validates the classes generated from a schema does not pull the CXF tooling at all, and one
-that generates a client does not have to carry the annotation plugin.
+It is the third piece of the old
+[`com.fillumina:krasa-jaxb-tools`](https://github.com/fillumina/krasa-jaxb-tools), split out so that
+a build which only validates the classes generated from a schema does not pull the CXF tooling at
+all, and one that generates a client does not have to carry the annotation plugin.
 
 ## Requirements
 
