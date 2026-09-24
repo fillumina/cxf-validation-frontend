@@ -20,6 +20,9 @@ all, and one that generates a client does not have to carry the annotation plugi
 
 An example of it inside a real build, with the test of that wiring, is
 [`cxf-validation-frontend-example`](https://github.com/fillumina/cxf-validation-frontend-example).
+The three plugins of this line together in one build, which is where the split is shown to do what
+the single plugin did, are in
+[`xjc-plugins-example`](https://github.com/fillumina/xjc-plugins-example).
 
 ## Requirements
 
