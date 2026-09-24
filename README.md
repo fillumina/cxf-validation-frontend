@@ -18,6 +18,9 @@ It is the third piece of the old
 a build which only validates the classes generated from a schema does not pull the CXF tooling at
 all, and one that generates a client does not have to carry the annotation plugin.
 
+An example of it inside a real build, with the test of that wiring, is
+[`cxf-validation-frontend-example`](https://github.com/fillumina/cxf-validation-frontend-example).
+
 ## Requirements
 
 - JDK 21 or newer.
