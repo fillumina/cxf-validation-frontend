@@ -56,6 +56,11 @@ final class FrontendRun {
         return new FrontendRun(output);
     }
 
+    /** @return the directory of sources generated in this run. */
+    Path generatedSources() {
+        return output;
+    }
+
     /** @return whether this run wrote the file, the path being relative to the output directory. */
     boolean hasFile(String relativePath) {
         return Files.exists(output.resolve(relativePath));

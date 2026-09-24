@@ -5,8 +5,8 @@ import org.apache.cxf.tools.common.model.JavaMethod;
 import org.apache.cxf.tools.common.model.JavaParameter;
 
 /**
- * Annotates one method of the interface: its return value, and the parameters it takes and returns,
- * each according to the option in use.
+ * Annotates one method of the interface: its non-void return value and its input/output
+ * parameters according to the option in use. An INOUT holder is annotated only once.
  */
 class ProcessorForJavaMethod {
 
@@ -28,7 +28,7 @@ class ProcessorForJavaMethod {
      */
     boolean process(JavaMethod javaMethod) {
         boolean written = false;
-        if (options.isValidOut()) {
+        if (options.isValidOut() && !"void".equals(javaMethod.getReturnValue())) {
             log("adding the annotation to the return value of " + javaMethod.getSignature());
             javaMethod.addAnnotation(VALID_RETURN, valid);
             written = true;
@@ -40,18 +40,14 @@ class ProcessorForJavaMethod {
     }
 
     private boolean process(JavaParameter javaParameter) {
-        boolean written = false;
-        if (options.isValidIn() && (javaParameter.isIN() || javaParameter.isINOUT())) {
-            log("adding the annotation to the incoming " + javaParameter.getName());
+        boolean incoming = options.isValidIn() && (javaParameter.isIN() || javaParameter.isINOUT());
+        boolean outgoing = options.isValidOut() && (javaParameter.isOUT() || javaParameter.isINOUT());
+        if (incoming || outgoing) {
+            log("adding the annotation to " + javaParameter.getName());
             javaParameter.addAnnotation(VALID_PARAM, valid);
-            written = true;
+            return true;
         }
-        if (options.isValidOut() && (javaParameter.isOUT() || javaParameter.isINOUT())) {
-            log("adding the annotation to the outgoing " + javaParameter.getName());
-            javaParameter.addAnnotation(VALID_RETURN, valid);
-            written = true;
-        }
-        return written;
+        return false;
     }
 
     private void log(String message) {

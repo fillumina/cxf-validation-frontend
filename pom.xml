@@ -194,6 +194,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Test the generated service interface with a real Jakarta Validation provider. -->
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>9.1.4.Final</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

@@ -48,8 +48,8 @@ public final class ServiceValidationOptions {
     }
 
     /**
-     * Whether {@code @Valid} is written on the method itself and on the parameters the service
-     * returns.
+     * Whether {@code @Valid} is written on non-void method returns and on outgoing parameters,
+     * including INOUT holders. An INOUT holder gets one annotation even when both sides are selected.
      *
      * @return true when it is
      */

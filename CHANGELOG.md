@@ -2,6 +2,12 @@
 
 ## 1.0.0-SNAPSHOT
 
+- Fix duplicate `@Valid` on INOUT holders with the default `both` policy: annotate the
+  single Java parameter once while preserving request and response selection.
+- Do not annotate void method returns; still annotate their selected parameters and
+  non-void returns. Generated-source compilation and Jakarta Validation provider metadata
+  tests cover the resulting interface.
+
 - First release of the standalone frontend. It was carried inside
   `com.fillumina:krasa-jaxb-tools` until 2.8.0, where it shipped two frontends, `krasa` and
   `krasa-jaxws`, and where its option was written under the name of the annotation plugin.

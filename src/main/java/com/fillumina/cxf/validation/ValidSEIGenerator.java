@@ -20,8 +20,9 @@ import org.apache.cxf.tools.wsdlto.frontend.jaxws.processor.WSDLToJavaProcessor;
  * generators: this class extends the generator CXF uses for the interface and only adds the
  * annotations to the model before handing it back.
  *
- * <p>Which of the method, the incoming parameters and the outgoing parameters are annotated is the
- * {@code generateAnnotations} option, read from the XJC arguments CXF passes
+ * <p>Which of the non-void returns, incoming parameters and outgoing parameters are annotated is the
+ * {@code generateAnnotations} option. An INOUT parameter is annotated once when either direction
+ * is selected. The option is read from the XJC arguments CXF passes
  * through.
  *
  * @author Vojtech Krasa

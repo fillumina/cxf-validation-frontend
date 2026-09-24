@@ -90,10 +90,14 @@ The frontend has one option, `generateAnnotations`, and it is written as
 
 | value | alternative | what it does |
 | --- | --- | --- |
-| `request` | `in` | add `@Valid` to the service parameters |
-| `response` | `out` | add `@Valid` to the method and to the parameters the service returns |
-| `both` | `inOut` | add `@Valid` to both, and this is the default |
+| `request` | `in` | add `@Valid` to incoming and INOUT parameters |
+| `response` | `out` | add `@Valid` to non-void method returns and outgoing and INOUT parameters |
+| `both` | `inOut` | annotate both sides (once on an INOUT parameter); this is the default |
 | `none` | | add nothing — the service interface is written as CXF writes it, with no annotation |
+
+A void method has no return value to validate and is never annotated on the method itself.
+An INOUT holder is a single Java parameter, so it gets one `@Valid` even when both
+directions are selected; `request` and `response` each still select that holder.
 
 Both columns are accepted, whatever the case. Those names are the vocabulary the WSDL and
 `WebParam.Mode` use for the input and the output message, which is what the generated interface
@@ -152,5 +156,5 @@ mvn -B verify
 
 Build with `verify` rather than `test`. One test — `FrontendJarIT`, which runs the frontend out
 of the jar — needs the jar, and the jar is built by `package`, which comes after the test phase; so
-`mvn test` runs 14 tests and leaves that one out, while `mvn verify`, `mvn install` and
-`mvn deploy` run all 15. CI runs `verify`.
+`mvn test` runs the unit tests and leaves that one out, while `mvn verify`, `mvn install`
+and `mvn deploy` also run the jar integration test. CI runs `verify`.

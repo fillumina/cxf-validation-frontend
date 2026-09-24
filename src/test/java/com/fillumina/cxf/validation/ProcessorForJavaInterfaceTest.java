@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.cxf.tools.common.model.JavaInterface;
 import org.apache.cxf.tools.common.model.JavaMethod;
 import org.apache.cxf.tools.common.model.JavaParameter;
+import org.apache.cxf.tools.common.model.JavaReturn;
 import org.apache.cxf.tools.common.model.JavaType;
 import org.junit.jupiter.api.Test;
 
@@ -41,11 +42,24 @@ class ProcessorForJavaInterfaceTest {
                 "the parameter carries the annotation, so the import is needed");
     }
 
-    /** The same method, with the other option: now the method itself carries the annotation. */
+    @Test
+    void voidMethodWithNoOutgoingParametersNeedsNoImport() throws Exception {
+        JavaInterface javaInterface = new JavaInterface();
+        javaInterface.addMethod(method("ping"));
+
+        new ProcessorForJavaInterface(options("response")).process(javaInterface);
+
+        assertFalse(javaInterface.getImports().hasNext(),
+                "a void method with no output carries no annotation");
+    }
+
+    /** A non-void method with the response option carries the annotation on its return. */
     @Test
     void aMethodAnnotatedOnTheReturnCarriesTheImport() throws Exception {
         JavaInterface javaInterface = new JavaInterface();
-        javaInterface.addMethod(method("ping"));
+        JavaMethod ping = method("ping");
+        ping.setReturn(new JavaReturn("result", "java.lang.String", ""));
+        javaInterface.addMethod(ping);
 
         new ProcessorForJavaInterface(options("response")).process(javaInterface);
 
