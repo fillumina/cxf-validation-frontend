@@ -1,6 +1,7 @@
 package com.fillumina.cxf.validation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -10,6 +11,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * The frontend, run out of the jar a build would put on the classpath of the cxf-codegen-plugin.
@@ -43,6 +46,7 @@ class FrontendJarIT {
                 "-frontend", ValidSEIGenerator.FRONTEND_NAME,
                 "-xjc-" + ServiceValidationOptions.OPTION_PREFIX_NAME + ":"
                         + ServiceValidationOptions.OPTION_NAME + "=both",
+                "-xjc-Xlocator", // XJC's own plugin must remain free to consume its option
                 "-d", output.toString(),
                 Path.of(WSDL).toAbsolutePath().toString()));
 
@@ -53,6 +57,30 @@ class FrontendJarIT {
         String generated = Files.readString(output.resolve(INTERFACE));
         assertTrue(generated.contains("import jakarta.validation.Valid;"), generated);
         assertTrue(generated.contains("@Valid"), generated);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "generateAnnotatons=none", "unknown=none", "verboseTypo=true", "verbose=typo", ""
+    })
+    void unknownFrontendOptionsFailThroughTheWsdl2javaCommandLine(String option) throws Exception {
+        Path jar = Path.of(required("frontend.jar"));
+        String tooling = Files.readString(Path.of(required("tooling.classpath.file"))).trim();
+        Path output = Files.createTempDirectory("frontend-unknown-option");
+        List<String> command = List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                "-cp", jar + File.pathSeparator + tooling,
+                "org.apache.cxf.tools.wsdlto.WSDLToJava",
+                "-frontend", ValidSEIGenerator.FRONTEND_NAME,
+                "-xjc-" + ServiceValidationOptions.OPTION_PREFIX_NAME
+                        + (option.isEmpty() ? "" : ":" + option),
+                "-d", output.toString(),
+                Path.of(WSDL).toAbsolutePath().toString());
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String log = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertNotEquals(0, process.waitFor(), () -> "unknown frontend option succeeded: " + option + "\n" + log);
+        assertTrue(log.contains(option.isEmpty() ? ServiceValidationOptions.OPTION_PREFIX_NAME
+                : option.substring(0, option.indexOf('='))), log);
     }
 
     private static String required(String property) {

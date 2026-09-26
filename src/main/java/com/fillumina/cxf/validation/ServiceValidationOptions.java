@@ -14,8 +14,9 @@ import com.sun.tools.xjc.BadCommandLineException;
  *
  * <p>The name is this project's. It is not the name of the plugin that annotates the generated
  * classes: an option that two plugins answer to makes XJC activate and consult only the first of
- * them, which is silent and depends on the classpath order. Only this one option is read here, and
- * the frontend deliberately does not depend on that plugin.
+ * them, which is silent and depends on the classpath order. Unknown names under this prefix
+ * fail rather than silently leaving the default policy in effect. Only this policy and verbose are
+ * read here; the frontend deliberately does not depend on that plugin.
  */
 public final class ServiceValidationOptions {
 
@@ -100,18 +101,23 @@ public final class ServiceValidationOptions {
         }
 
         /**
-         * Reads one argument, and does nothing when it is not one of this frontend's. An argument
-         * of another plugin has to be left alone: XJC returns at the first plugin that consumes an
+         * Reads one argument, rejecting unknown names and values under this frontend's prefix,
+         * and doing nothing when the argument is not one of this frontend's. An argument of
+         * another plugin has to be left alone: XJC returns at the first plugin that consumes an
          * argument, so a plugin that claims too much keeps the other's options from being read.
          *
          * @param argument one argument of the command line, as it was written
          * @return true when the argument belonged to this frontend
-         * @throws BadCommandLineException when the argument is this frontend's but its value is not
-         *     one of the accepted ones
+         * @throws BadCommandLineException when the argument is this frontend's but its name or
+         *     value is not accepted
          */
         public boolean parseArgument(String argument) throws BadCommandLineException {
-            if (!argument.startsWith(PREFIX)) {
+            if (!argument.equals("-" + OPTION_PREFIX_NAME) && !argument.startsWith(PREFIX)) {
                 return false;
+            }
+            if (argument.equals("-" + OPTION_PREFIX_NAME)) {
+                throw new BadCommandLineException("missing option name after " + PREFIX
+                        + " (expected " + OPTION_NAME + " or verbose)");
             }
             String option = argument.substring(PREFIX.length());
             int equals = option.indexOf('=');
@@ -119,7 +125,7 @@ public final class ServiceValidationOptions {
             String value = equals < 0 ? "" : option.substring(equals + 1).trim();
 
             if ("verbose".equals(name)) {
-                verbose = !"false".equalsIgnoreCase(value);
+                verbose = readVerbose(value);
             } else if (OPTION_NAME.equals(name)) {
                 // request and response are what the value means to a reader; in and out are what
                 // the WSDL calls the two messages, and what WebParam.Mode calls them in the
@@ -145,8 +151,32 @@ public final class ServiceValidationOptions {
                             + " accepts request, response, both or none, or the in, out and inout of"
                             + " the WSDL, and not '" + value + "'");
                 }
+            } else {
+                throw new BadCommandLineException("unknown frontend option '" + name
+                        + "' in " + argument + " (expected " + OPTION_NAME + " or verbose)");
             }
             return true;
+        }
+
+        /**
+         * Reads the value of {@code verbose}. Written on its own it means on, and `true` and
+         * `false`, in any case, are the two values that name a state. Anything else is refused
+         * like any other unknown value, rather than being read as on because it is not
+         * `false`.
+         *
+         * @param value what followed the equals sign, empty when the option was written bare
+         * @return whether verbose is on
+         * @throws BadCommandLineException when the value names no state
+         */
+        private static boolean readVerbose(String value) throws BadCommandLineException {
+            if (value.isEmpty() || "true".equalsIgnoreCase(value)) {
+                return true;
+            }
+            if ("false".equalsIgnoreCase(value)) {
+                return false;
+            }
+            throw new BadCommandLineException("option verbose accepts true or false, either on its"
+                    + " own or as its value, and not '" + value + "'");
         }
 
         /**

@@ -13,15 +13,17 @@ import org.xml.sax.ErrorHandler;
  * <p>An option of a CXF frontend has to travel among the XJC arguments, because that is the array
  * CXF fills and hands to the frontend. XJC, in turn, refuses an argument that no XJC plugin
  * consumes: it stops with {@code unrecognized parameter} and prints its usage. This plugin exists
- * only to consume them, and its option name, {@code -XCxfValidationFrontendOptions}, says as much.
+ * to validate and consume them, and its option name, {@code -XCxfValidationFrontendOptions},
+ * says as much. Unknown names under that prefix fail instead of silently using the default policy.
  *
  * <p>It deliberately answers to a name of its own rather than to the name of the plugin that
  * annotates the generated classes. Two plugins with one option name are a trap: XJC activates the
  * first one it finds for the bare option and returns at the first one that consumes an argument, so
  * the other is left out, silently and according to the order of the classpath.
  *
- * <p>The frontend itself reads the options in the CXF stage, from the arguments CXF passes it, so
- * nothing here parses them.
+ * <p>This plugin checks names and values as XJC receives them. The frontend reads the same
+ * arguments in the CXF stage and also checks them (including the bare option, which XJC activates
+ * without calling {@code parseArgument}).
  *
  * <p>The README has a section on the arrangement, "How an option reaches a CXF frontend, and the
  * XJC plugin that comes with it", including the two rules that keep it from going wrong.
@@ -46,16 +48,23 @@ public class FrontendOptionsPlugin extends Plugin {
                 + ":" + ServiceValidationOptions.OPTION_NAME + "=request|response|both|none\n"
                 + "      :  in, out and inout, the names the WSDL gives the same three, are accepted"
                 + " too\n"
+                + "      :  -" + ServiceValidationOptions.OPTION_PREFIX_NAME + ":verbose is also accepted\n"
                 + "      :  read by the cxf-validation-frontend frontend, which writes @Valid on the"
-                + " service endpoint interface it generates. This plugin only accepts the option:"
+                + " service endpoint interface it generates. This plugin validates the option:"
                 + " XJC refuses an argument no plugin consumes, and a frontend's options travel"
-                + " among the XJC arguments\n";
+                + " among the XJC arguments. Unknown names or values fail; verbose is accepted\n";
     }
 
     @Override
     public int parseArgument(Options opt, String[] args, int index)
             throws BadCommandLineException, IOException {
-        return args[index].startsWith("-" + getOptionName()) ? 1 : 0;
+        String argument = args[index];
+        if (!argument.equals("-" + getOptionName())
+                && !argument.startsWith(ServiceValidationOptions.PREFIX)) {
+            return 0;
+        }
+        ServiceValidationOptions.builder().parseArgument(argument);
+        return 1;
     }
 
     @Override

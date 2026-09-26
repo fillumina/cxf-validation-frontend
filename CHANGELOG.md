@@ -2,6 +2,12 @@
 
 ## 1.0.0-SNAPSHOT
 
+- Reject misspelled or unknown names under `-XCxfValidationFrontendOptions:` (including a
+  bare prefix) instead of silently generating with the default policy. The values are checked as
+  well: `generateAnnotations` takes a policy, `verbose` takes a state, and anything else fails.
+  XJC checks named arguments early; the frontend also checks the forwarded arguments. Other XJC
+  plugins' options remain theirs.
+
 - Fix duplicate `@Valid` on INOUT holders with the default `both` policy: annotate the
   single Java parameter once while preserving request and response selection.
 - Do not annotate void method returns; still annotate their selected parameters and

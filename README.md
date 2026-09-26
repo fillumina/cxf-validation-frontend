@@ -18,6 +18,13 @@ It is the third piece of the old
 a build which only validates the classes generated from a schema does not pull the CXF tooling at
 all, and one that generates a client does not have to carry the annotation plugin.
 
+The other two pieces of that line are
+[`xjc-primitives-plugin`](https://github.com/fillumina/xjc-primitives-plugin), which boxes the
+generated primitives so that a constraint such as `@NotNull` can mean something on them, and
+[`xjc-bean-validation-plugin`](https://github.com/fillumina/xjc-bean-validation-plugin), which
+writes the constraints the schema states. `@Valid` cascades through them, so a build that wants the
+constraints enforced wants the two of them as well.
+
 An example of it inside a real build, with the test of that wiring, is
 [`cxf-validation-frontend-example`](https://github.com/fillumina/cxf-validation-frontend-example).
 The three plugins of this line together in one build, which is where the split is shown to do what
@@ -102,7 +109,10 @@ directions are selected; `request` and `response` each still select that holder.
 Both columns are accepted, whatever the case. Those names are the vocabulary the WSDL and
 `WebParam.Mode` use for the input and the output message, which is what the generated interface
 prints, so a build written by someone who knows it keeps working. `verbose`, on its own, prints
-which annotation was written where.
+which annotation was written where. Unknown or misspelled names after
+`-XCxfValidationFrontendOptions:` (and the bare prefix without a name) fail generation instead of
+silently using the default `both` policy. The values are checked as well: `generateAnnotations`
+takes one of the names above, and `verbose` takes `true` or `false`, or is written on its own.
 
 ### How an option reaches a CXF frontend, and the XJC plugin that comes with it
 
@@ -117,19 +127,24 @@ ships with this project:
 
 ```java
 @Override
-public int parseArgument(Options opt, String[] args, int index) {
-    return args[index].startsWith("-" + getOptionName()) ? 1 : 0;
-}
-
-@Override
-public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
-    // the annotations of the generated classes are not this plugin's business
-    return true;
+public int parseArgument(Options opt, String[] args, int index)
+        throws BadCommandLineException {
+    String argument = args[index];
+    if (!argument.equals("-" + getOptionName())
+            && !argument.startsWith(ServiceValidationOptions.PREFIX)) {
+        return 0; // a different plugin's option
+    }
+    ServiceValidationOptions.builder().parseArgument(argument); // rejects unknown names/values
+    return 1;
 }
 ```
 
-It accepts the arguments of this frontend and reads nothing from them. The frontend parses the
-values itself, in the CXF stage, out of the same array — which is what keeps this project
+XJC activates a bare `-XCxfValidationFrontendOptions` without calling `parseArgument`, so the
+frontend also checks the same array and rejects a missing name. The XJC plugin's `run` method
+still does nothing to generated classes.
+
+It validates and consumes only this frontend's arguments at the XJC stage. The frontend also
+parses the same array in the CXF stage — which is what keeps this project
 independent of the plugin that annotates the generated classes: the two can be used together, or
 separately, and neither needs the other on its classpath.
 
@@ -142,7 +157,9 @@ Two rules hold the arrangement together, and both are there because of how XJC w
   else. For an argument that carries a value XJC returns at the first plugin that consumes it, so a
   plugin that claims too much keeps another plugin's options from ever being read.
 
-Both are covered by `ServiceValidationOptionsTest`. The second one is worth a test of its own
+Both are covered by `ServiceValidationOptionsTest`, and `FrontendJarIT` runs the real
+wsdl2java/XJC command line with misspelled names and XJC's foreign `-Xlocator` plugin. The
+second rule is worth a test of its own
 because the failure is invisible: the build succeeds and the other plugin's annotations are simply
 missing from the generated classes.
 
