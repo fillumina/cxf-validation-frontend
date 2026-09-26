@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-SNAPSHOT
+## 1.0.0
 
 - Reject misspelled or unknown names under `-XCxfValidationFrontendOptions:` (including a
   bare prefix) instead of silently generating with the default policy. The values are checked as

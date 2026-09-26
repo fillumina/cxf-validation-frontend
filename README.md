@@ -36,6 +36,14 @@ The three plugins of this line together in one build, which is where the split i
 the single plugin did, are in
 [`xjc-plugins-example`](https://github.com/fillumina/xjc-plugins-example).
 
+## Version and status
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.fillumina/cxf-validation-frontend.svg)](https://central.sonatype.com/artifact/com.fillumina/cxf-validation-frontend)
+
+The released version is **1.0.0**, published on Maven Central. The option name, its four policies
+and the `@Valid` it writes stay the same within 1.x; a method or a parameter it annotates in the
+wrong way is a bug fixed in a patch release.
+
 ## Requirements
 
 - JDK 21 or newer.
@@ -87,7 +95,7 @@ option are passed among the extra arguments:
     <dependency>
       <groupId>com.fillumina</groupId>
       <artifactId>cxf-validation-frontend</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
 </plugin>
