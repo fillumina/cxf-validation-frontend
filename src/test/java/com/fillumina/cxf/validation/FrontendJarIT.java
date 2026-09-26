@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -26,7 +27,17 @@ import org.junit.jupiter.params.provider.ValueSource;
  * <p>It runs in the integration test phase, which is why {@code mvn test} leaves it out: it needs
  * the jar, and {@code package} builds that. Use {@code mvn verify}, {@code mvn install} or
  * {@code mvn deploy}, and CI, which runs {@code verify}.
+ *
+ * <p>An editor's test runner is not Maven, and this is the trap worth writing down. It discovers
+ * every class carrying {@code @Test} on the test classpath and runs it there, on the project's own
+ * classpath, where {@code target/classes} is on it and the jar this test needs is not. Surefire and
+ * failsafe never do that: the split between the two plugins is what keeps a class that needs a
+ * packaged artefact out of {@code mvn test}. Left alone, the class reported six failures in the
+ * editor, one per case, and every one of them was the missing property rather than the frontend.
+ * The annotation below turns those into six skips that say why, and leaves every case running under
+ * {@code mvn verify}.
  */
+@EnabledIfSystemProperty(named = "frontend.jar", matches = ".+")
 class FrontendJarIT {
 
     private static final String WSDL = "src/test/resources/hello.wsdl";
