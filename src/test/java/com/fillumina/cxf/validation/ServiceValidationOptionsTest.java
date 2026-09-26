@@ -14,8 +14,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * What the frontend does with the arguments it is given.
  *
- * <p>The first case is the one that matters most: an argument of another plugin has to be left
- * alone. Swallowing one would keep that plugin from running, which XJC would not report.
+ * <p>
+ * The first case is the one that matters most: an argument of another plugin
+ * has to be left alone. Swallowing one would keep that plugin from running,
+ * which XJC would not report.
  */
 class ServiceValidationOptionsTest {
 
@@ -35,18 +37,18 @@ class ServiceValidationOptionsTest {
 
     @ParameterizedTest(name = "{0}")
     @CsvSource({
-        // the names a reader understands
-        "request,  true,  false",
-        "response, false, true",
-        "both,     true,  true",
-        "none,     false, false",
-        // the names the WSDL gives the same two sides, whatever the case
-        "in,    true,  false",
-        "out,   false, true",
-        "inOut, true,  true",
-        "IN,    true,  false",
-        "Out,   false, true",
-        "INOUT, true,  true",
+            // the names a reader understands
+            "request,  true,  false",
+            "response, false, true",
+            "both,     true,  true",
+            "none,     false, false",
+            // the names the WSDL gives the same two sides, whatever the case
+            "in,    true,  false",
+            "out,   false, true",
+            "inOut, true,  true",
+            "IN,    true,  false",
+            "Out,   false, true",
+            "INOUT, true,  true",
     })
     void thePolicyIsRead(String policy, boolean validIn, boolean validOut) throws Exception {
         ServiceValidationOptions.Builder builder = ServiceValidationOptions.builder();
@@ -61,17 +63,18 @@ class ServiceValidationOptionsTest {
 
     @ParameterizedTest
     @CsvSource({
-        "generateAnnotatons=none, generateAnnotatons",
-        "unknown=none, unknown",
-        "verboseTypo=true, verboseTypo",
-        "':', option",
-        "'', option"
+            "generateAnnotatons=none, generateAnnotatons",
+            "unknown=none, unknown",
+            "verboseTypo=true, verboseTypo",
+            "':', option",
+            "'', option"
     })
     void anUnknownNameIsRefused(String suffix, String badName) {
         ServiceValidationOptions.Builder builder = ServiceValidationOptions.builder();
         String argument = "-" + ServiceValidationOptions.OPTION_PREFIX_NAME
                 + (suffix.isEmpty() ? "" : suffix.startsWith(":") ? suffix : ":" + suffix);
-        Exception thrown = assertThrows(Exception.class, () -> builder.parseArgument(argument));
+        Exception thrown = assertThrows(Exception.class, () -> builder.parseArgument(argument),
+                "argument: " + argument);
         assertTrue(thrown.getMessage().contains(badName), thrown.getMessage());
     }
 

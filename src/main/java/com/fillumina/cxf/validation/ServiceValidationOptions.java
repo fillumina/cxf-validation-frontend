@@ -5,25 +5,33 @@ import com.sun.tools.xjc.BadCommandLineException;
 /**
  * The options of the {@code bean-validation} frontend.
  *
- * <p>They travel among the XJC arguments, under a name of their own, and are accepted there by
- * {@link FrontendOptionsPlugin}:
+ * <p>
+ * They travel among the XJC arguments, under a name of their own, and are
+ * accepted there by {@link FrontendOptionsPlugin}:
  *
  * <pre>
  * -xjc-XCxfValidationFrontendOptions:generateAnnotations=both
  * </pre>
  *
- * <p>The name is this project's. It is not the name of the plugin that annotates the generated
- * classes: an option that two plugins answer to makes XJC activate and consult only the first of
- * them, which is silent and depends on the classpath order. Unknown names under this prefix
- * fail rather than silently leaving the default policy in effect. Only this policy and verbose are
- * read here; the frontend deliberately does not depend on that plugin.
+ * <p>
+ * The name is this project's. It is not the name of the plugin that annotates
+ * the generated classes: an option that two plugins answer to makes XJC
+ * activate and consult only the first of them, which is silent and depends on
+ * the classpath order. Unknown names under this prefix fail rather than
+ * silently leaving the default policy in effect. Only this policy and verbose
+ * are read here; the frontend deliberately does not depend on that plugin.
  */
 public final class ServiceValidationOptions {
 
     /** The name of the option among the XJC arguments, without its leading dash. */
     public static final String OPTION_PREFIX_NAME = "XCxfValidationFrontendOptions";
 
-    /** What an option of this frontend starts with, as it is written on the command line. */
+    private static final String FULL_OPTION_PREFIX_NAME = "-" + OPTION_PREFIX_NAME;
+
+    /**
+     * What an option of this frontend starts with, as it is written on the command
+     * line.
+     */
     public static final String PREFIX = "-" + OPTION_PREFIX_NAME + ":";
 
     /** The option that says where {@code @Valid} is written on a method. */
@@ -49,8 +57,9 @@ public final class ServiceValidationOptions {
     }
 
     /**
-     * Whether {@code @Valid} is written on non-void method returns and on outgoing parameters,
-     * including INOUT holders. An INOUT holder gets one annotation even when both sides are selected.
+     * Whether {@code @Valid} is written on non-void method returns and on outgoing
+     * parameters, including INOUT holders. An INOUT holder gets one annotation even
+     * when both sides are selected.
      *
      * @return true when it is
      */
@@ -70,11 +79,11 @@ public final class ServiceValidationOptions {
     void logActualOptions() {
         if (verbose) {
             System.out.println("[" + ValidSEIGenerator.FRONTEND_NAME + "] "
-                    + OPTION_NAME + ": " + value());
+                    + OPTION_NAME + ": " + validValueAsString());
         }
     }
 
-    private String value() {
+    private String validValueAsString() {
         if (validIn && validOut) {
             return "both";
         }
@@ -101,21 +110,22 @@ public final class ServiceValidationOptions {
         }
 
         /**
-         * Reads one argument, rejecting unknown names and values under this frontend's prefix,
-         * and doing nothing when the argument is not one of this frontend's. An argument of
-         * another plugin has to be left alone: XJC returns at the first plugin that consumes an
-         * argument, so a plugin that claims too much keeps the other's options from being read.
+         * Reads one argument, rejecting unknown names and values under this frontend's
+         * prefix, and doing nothing when the argument is not one of this frontend's. An
+         * argument of another plugin has to be left alone: XJC returns at the first
+         * plugin that consumes an argument, so a plugin that claims too much keeps the
+         * other's options from being read.
          *
          * @param argument one argument of the command line, as it was written
          * @return true when the argument belonged to this frontend
-         * @throws BadCommandLineException when the argument is this frontend's but its name or
-         *     value is not accepted
+         * @throws BadCommandLineException when the argument is this frontend's but its
+         * name or value is not accepted
          */
         public boolean parseArgument(String argument) throws BadCommandLineException {
-            if (!argument.equals("-" + OPTION_PREFIX_NAME) && !argument.startsWith(PREFIX)) {
+            if (!argument.equals(FULL_OPTION_PREFIX_NAME) && !argument.startsWith(PREFIX)) {
                 return false;
             }
-            if (argument.equals("-" + OPTION_PREFIX_NAME)) {
+            if (argument.equals(FULL_OPTION_PREFIX_NAME)) {
                 throw new BadCommandLineException("missing option name after " + PREFIX
                         + " (expected " + OPTION_NAME + " or verbose)");
             }
@@ -127,9 +137,9 @@ public final class ServiceValidationOptions {
             if ("verbose".equals(name)) {
                 verbose = readVerbose(value);
             } else if (OPTION_NAME.equals(name)) {
-                // request and response are what the value means to a reader; in and out are what
-                // the WSDL calls the two messages, and what WebParam.Mode calls them in the
-                // interface this frontend annotates, so both spellings are accepted
+                // request and response are what the value means to a reader; in and out are
+                // what the WSDL calls the two messages, and what WebParam.Mode calls them in
+                // the interface this frontend annotates, so both spellings are accepted
                 switch (value.toLowerCase()) {
                     case "request", "in" -> {
                         validIn = true;
@@ -159,12 +169,13 @@ public final class ServiceValidationOptions {
         }
 
         /**
-         * Reads the value of {@code verbose}. Written on its own it means on, and `true` and
-         * `false`, in any case, are the two values that name a state. Anything else is refused
-         * like any other unknown value, rather than being read as on because it is not
-         * `false`.
+         * Reads the value of {@code verbose}. Written on its own it means on, and
+         * `true` and `false`, in any case, are the two values that name a state.
+         * Anything else is refused like any other unknown value, rather than being read
+         * as on because it is not `false`.
          *
-         * @param value what followed the equals sign, empty when the option was written bare
+         * @param value what followed the equals sign, empty when the option was written
+         * bare
          * @return whether verbose is on
          * @throws BadCommandLineException when the value names no state
          */

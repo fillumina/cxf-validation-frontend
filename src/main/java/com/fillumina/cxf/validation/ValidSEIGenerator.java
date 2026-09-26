@@ -13,19 +13,21 @@ import org.apache.cxf.tools.wsdlto.frontend.jaxws.generators.SEIGenerator;
 import org.apache.cxf.tools.wsdlto.frontend.jaxws.processor.WSDLToJavaProcessor;
 
 /**
- * Adds the {@code @Valid} annotation to the methods and the parameters of the service endpoint
- * interface CXF generates from a WSDL.
+ * Adds the {@code @Valid} annotation to the methods and the parameters of the
+ * service endpoint interface CXF generates from a WSDL.
  *
- * <p>The frontend is switched on with {@code -frontend bean-validation}, which also runs CXF's own
- * generators: this class extends the generator CXF uses for the interface and only adds the
- * annotations to the model before handing it back.
+ * <p>
+ * The frontend is switched on with {@code -frontend bean-validation}, which
+ * also runs CXF's own generators: this class extends the generator CXF uses for
+ * the interface and only adds the annotations to the model before handing it
+ * back.
  *
- * <p>Which of the non-void returns, incoming parameters and outgoing parameters are annotated is the
- * {@code generateAnnotations} option. An INOUT parameter is annotated once when either direction
- * is selected. The option is read from the XJC arguments CXF passes
- * through.
+ * <p>
+ * Which of the non-void returns, incoming parameters and outgoing parameters
+ * are annotated is the {@code generateAnnotations} option. An INOUT parameter
+ * is annotated once when either direction is selected. The option is read from
+ * the XJC arguments CXF passes through.
  *
- * @author Vojtech Krasa
  * @author Francesco Illuminati
  */
 public class ValidSEIGenerator extends SEIGenerator {
@@ -33,8 +35,8 @@ public class ValidSEIGenerator extends SEIGenerator {
     static final String FRONTEND_NAME = "bean-validation";
 
     /**
-     * Creates the generator. CXF instantiates it from {@code META-INF/tools-plugin.xml}, so it
-     * takes no arguments.
+     * Creates the generator. CXF instantiates it from
+     * {@code META-INF/tools-plugin.xml}, so it takes no arguments.
      */
     public ValidSEIGenerator() {
     }
@@ -46,10 +48,12 @@ public class ValidSEIGenerator extends SEIGenerator {
 
     @Override
     public void generate(ToolContext context) throws ToolException {
+        // before the branch, not inside it: XJC refuses these arguments on the command line
+        // already, so this is the check for a caller that drives the frontend itself, and a
+        // run with no model is still a run whose arguments can be wrong
         ServiceValidationOptions options = parseArguments(context);
 
-        Map<QName, JavaModel> models =
-                CastUtils.cast((Map<?, ?>) context.get(WSDLToJavaProcessor.MODEL_MAP));
+        Map<QName, JavaModel> models = CastUtils.cast((Map<?, ?>) context.get(WSDLToJavaProcessor.MODEL_MAP));
         if (models != null) {
             ProcessorForJavaModel processor = new ProcessorForJavaModel(options);
             models.values().forEach(processor::process);
@@ -59,14 +63,15 @@ public class ValidSEIGenerator extends SEIGenerator {
     }
 
     /**
-     * Reads the option out of the XJC arguments, which CXF passes to the frontend unchanged.
+     * Reads the option out of the XJC arguments, which CXF passes to the frontend
+     * unchanged.
      */
-    private ServiceValidationOptions parseArguments(ToolContext context) throws ToolException {
+    private static ServiceValidationOptions parseArguments(ToolContext context) throws ToolException {
         ServiceValidationOptions.Builder builder = ServiceValidationOptions.builder();
 
         String[] xjcArguments = (String[]) context.get(ToolConstants.CFG_XJC_ARGS);
         if (xjcArguments != null) {
-            for (String argument : Arrays.asList(xjcArguments)) {
+            for (String argument : xjcArguments) {
                 try {
                     builder.parseArgument(argument);
                 } catch (BadCommandLineException ex) {
