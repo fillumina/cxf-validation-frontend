@@ -1,3 +1,5 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.fillumina/cxf-validation-frontend.svg)](https://central.sonatype.com/artifact/com.fillumina/cxf-validation-frontend)
+
 # cxf-validation-frontend
 
 An [Apache CXF](https://cxf.apache.org/docs/tools.html) frontend for `wsdl2java` that adds the
@@ -37,8 +39,6 @@ the single plugin did, are in
 [`xjc-plugins-example`](https://github.com/fillumina/xjc-plugins-example).
 
 ## Version and status
-
-[![Maven Central](https://img.shields.io/maven-central/v/com.fillumina/cxf-validation-frontend.svg)](https://central.sonatype.com/artifact/com.fillumina/cxf-validation-frontend)
 
 The released version is **1.0.0**, published on Maven Central. The option name, its four policies
 and the `@Valid` it writes stay the same within 1.x; a method or a parameter it annotates in the
