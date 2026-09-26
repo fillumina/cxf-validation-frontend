@@ -2,7 +2,12 @@
 
 An [Apache CXF](https://cxf.apache.org/docs/tools.html) frontend for `wsdl2java` that adds the
 Jakarta Bean Validation `@Valid` annotation to the service endpoint interface generated from a
-WSDL: to the methods, and to the parameters they take and return, each as far as the option asks.
+WSDL. You choose what it annotates either or both of:
+
+- the methods
+- the parameters they take and return
+
+With `generateAnnotations=both`, the generated interface looks like this:
 
 ```java
 @WebService(targetNamespace = "...")
@@ -36,12 +41,10 @@ the single plugin did, are in
 - JDK 21 or newer.
 - Apache CXF 4.2, which is what it is built against and what supplies the tooling at run time.
 - Jakarta Bean Validation 3.1, for the annotation it writes.
-- **Jakarta only, and it cannot be otherwise: CXF 4 validates with `jakarta.validation`.** Its
-  `BeanValidationProvider` takes a `jakarta.validation.Validator`, and `cxf-core` declares the
-  `jakarta.validation` API and never the `javax` one, so a `javax.validation.Valid` written on the
-  generated interface would be invisible to the runtime. This frontend writes `jakarta.validation.Valid`
-  and has no `javax` flavour. A build that still validates with the `javax` API belongs to the older
-  `com.fillumina:krasa-jaxb-tools`, whose frontends run with CXF 3.5.
+- This plugin supports **Jakarta only**, because CXF 4 validates only with `jakarta.validation`. A
+  build that validates with the `javax` API belongs to the older
+  [`com.fillumina:krasa-jaxb-tools`](https://github.com/fillumina/krasa-jaxb-tools), whose frontends
+  run with CXF 3.5.
 
 ## Using it
 
@@ -95,34 +98,26 @@ option are passed among the extra arguments:
 The frontend has one option, `generateAnnotations`, and it is written as
 `-xjc-XCxfValidationFrontendOptions:generateAnnotations=<value>`:
 
-| value | alternative | what it does |
-| --- | --- | --- |
-| `request` | `in` | add `@Valid` to incoming and INOUT parameters |
-| `response` | `out` | add `@Valid` to non-void method returns and outgoing and INOUT parameters |
-| `both` | `inOut` | annotate both sides (once on an INOUT parameter); this is the default |
-| `none` | | add nothing — the service interface is written as CXF writes it, with no annotation |
+| value      | alternative | what it does                                                              |
+| ---------- | ----------- | ------------------------------------------------------------------------- |
+| `request`  | `in`        | add `@Valid` to incoming and INOUT parameters                             |
+| `response` | `out`       | add `@Valid` to non-void method returns and outgoing and INOUT parameters |
+| `both`     | `inOut`     | annotate both sides (once on an INOUT parameter); this is the default     |
+| `none`     |             | add nothing to what CXF writes by itself                                  |
 
 A void method has no return value to validate and is never annotated on the method itself.
 An INOUT holder is a single Java parameter, so it gets one `@Valid` even when both
 directions are selected; `request` and `response` each still select that holder.
 
-Both columns are accepted, whatever the case. Those names are the vocabulary the WSDL and
-`WebParam.Mode` use for the input and the output message, which is what the generated interface
-prints, so a build written by someone who knows it keeps working. `verbose`, on its own, prints
+Both alternatives are accepted, whatever the case. `verbose`, on its own, prints
 which annotation was written where. Unknown or misspelled names after
 `-XCxfValidationFrontendOptions:` (and the bare prefix without a name) fail generation instead of
-silently using the default `both` policy. The values are checked as well: `generateAnnotations`
-takes one of the names above, and `verbose` takes `true` or `false`, or is written on its own.
+silently using the default `both` policy. The values are checked too: `generateAnnotations` takes
+one of the names in the table, and `verbose` takes `true` or `false`, or is written on its own.
 
-### How an option reaches a CXF frontend, and the XJC plugin that comes with it
+### Using an XJC plugin to pass options to the CXF frontend
 
-A frontend cannot simply be handed its own options. CXF collects the arguments written
-`-xjc-…` into one array and passes that array to XJC, and it is the same array, under
-`ToolConstants.CFG_XJC_ARGS`, that the frontend reads when it runs. There is no second channel.
-
-XJC, in turn, refuses an argument that none of its plugins consumes: it stops with
-`unrecognized parameter` and prints its usage. So an option of a frontend only gets through if
-some XJC plugin accepts it on the way. That is the entire job of `FrontendOptionsPlugin`, which
+Extending the full CXF framework this frontend cannot simply be handed its own specific options so we needed to define an XJC plugin that accepts it on its behalf. That is the entire job of `FrontendOptionsPlugin`, which
 ships with this project:
 
 ```java
@@ -139,29 +134,9 @@ public int parseArgument(Options opt, String[] args, int index)
 }
 ```
 
-XJC activates a bare `-XCxfValidationFrontendOptions` without calling `parseArgument`, so the
-frontend also checks the same array and rejects a missing name. The XJC plugin's `run` method
-still does nothing to generated classes.
-
-It validates and consumes only this frontend's arguments at the XJC stage. The frontend also
-parses the same array in the CXF stage — which is what keeps this project
-independent of the plugin that annotates the generated classes: the two can be used together, or
-separately, and neither needs the other on its classpath.
-
-Two rules hold the arrangement together, and both are there because of how XJC walks its plugins:
-
-- **the option name belongs to this project** (`-XCxfValidationFrontendOptions`), never to another
-  plugin's. For a bare option XJC activates the first plugin whose name matches and returns without
-  asking the rest, so two plugins answering to one name mean that one of them silently never runs;
-- **the accepting plugin consumes only its own arguments** and returns "not mine" for everything
-  else. For an argument that carries a value XJC returns at the first plugin that consumes it, so a
-  plugin that claims too much keeps another plugin's options from ever being read.
-
-Both are covered by `ServiceValidationOptionsTest`, and `FrontendJarIT` runs the real
-wsdl2java/XJC command line with misspelled names and XJC's foreign `-Xlocator` plugin. The
-second rule is worth a test of its own
-because the failure is invisible: the build succeeds and the other plugin's annotations are simply
-missing from the generated classes.
+XJC offers every argument to its plugins and the first one that accepts it consumes it, so this
+project's plugin refuses an unknown name or value under its own prefix, and the build stops
+before anything is generated. Its `run` method still does nothing to generated classes.
 
 ## Building
 
